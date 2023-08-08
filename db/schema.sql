@@ -1,38 +1,30 @@
-const inquirer = require("inquirer");
+DROP DATABASE IF EXISTS employees_db;
+CREATE DATABASE employees_db;
 
-const getRole = () =>  {
-    const sql = `SELECT roles.title AS Roles from roles`
-    
-    dbQuery(sql, false, false, true)
-};
+USE employees_db;
 
-const addRole = () => {
-  
-    connection.query(`SELECT * from department`, (err, res) => {
-        if (err) {
-            throw err;
-        };
+CREATE TABLE department (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    department_name VARCHAR(30) NOT NULL
+);
 
-        res.forEach(row => {
-            deptArr.push({
-                id: row.id,
-                name: row.name
-            });
-        });
-        console.log(deptArr)
-    });
+CREATE TABLE role (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(30) NOT NULL,
+    salary DECIMAL(10, 2) NOT NULL,
+    department_id INT,
+    FOREIGN KEY (department_id)
+    REFERENCES department(id)
+    ON DELETE SET NULL
+);
 
-    inquirer.prompt(rolePrompt)
-        .then(input => {
-            const deptId = deptArr.filter(dept => input.department === dept.name)[0].id;
-
-            const sql = `INSERT INTO roles (title, salary, department_id)
-                VALUES (?, ?, ?)`;
-            const params = [input.title, input.salary, deptId];
-        
-            dbQuery(sql, params, 'Successfully added role!');
-        });
-};
-
-module.exports = { getRole, addRole};
-const rolePrompt = require('../lib/roles.js');
+CREATE TABLE employee (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    first_name VARCHAR(30) NOT NULL,
+    last_name VARCHAR(30) NOT NULL,
+    role_id INT,
+    manager_id INT REFERENCES employee(id),
+    FOREIGN KEY (role_id)
+    REFERENCES role(id)
+    ON DELETE SET NULL
+);
